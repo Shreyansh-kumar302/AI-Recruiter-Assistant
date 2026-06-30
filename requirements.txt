@@ -1,0 +1,9 @@
+streamlit==1.58.0
+sentence-transformers
+transformers
+torch
+torchvision
+scikit-learn
+numpy
+pandas
+python-docx
