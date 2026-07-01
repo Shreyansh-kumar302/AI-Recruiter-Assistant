@@ -957,6 +957,39 @@ if st.session_state.active_tab == "Dashboard":
                 })
             st.dataframe(table, use_container_width=True, hide_index=True)
             
+            import io
+            import pandas as pd
+            
+            export_data = []
+            for r_rank, r_result in enumerate(ranked_candidates, start=1):
+                export_data.append({
+                    "Rank": r_rank,
+                    "Candidate ID": r_result["candidate_id"],
+                    "Headline": r_result["headline"],
+                    "Final Score": round(r_result["final_score"], 4),
+                    "Semantic Score": round(r_result.get("semantic_score", 0), 4),
+                    "Experience Score": round(r_result.get("experience_score", 0), 4),
+                    "Skill Score": round(r_result.get("skill_score", 0), 4),
+                    "Behaviour Score": round(r_result.get("behaviour_score", 0), 4),
+                    "Semantic Skill Score": round(r_result.get("semantic_skill_score", 0), 4),
+                    "Key Strengths": "; ".join(r_result.get("reasons", [])),
+                    "Missing Skills": "; ".join(r_result.get("missing", []))
+                })
+            
+            df_export = pd.DataFrame(export_data)
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                df_export.to_excel(writer, index=False, sheet_name='Ranked Candidates')
+            excel_data = excel_buffer.getvalue()
+            
+            st.download_button(
+                label="📥 Download Ranked Candidates (XLSX)",
+                data=excel_data,
+                file_name="ranked_candidates.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+            
             st.info("💡 Go to the **Candidates** tab in the sidebar to review detailed profile matches and breakdown analysis.")
 
 elif st.session_state.active_tab == "Candidates":
